@@ -6,6 +6,7 @@ import { generateToken } from "../../utils/jwt.util.js";
 import expressAsyncHandler from "express-async-handler";
 import { log } from "../../utils/logger.js";
 
+
 // register
 export const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password, contactNumber } = req.body;
@@ -87,6 +88,14 @@ export const updateProfile = expressAsyncHandler(async (req, res, next) => {
 });
 
 // update password
+ 
+export const changePassword = expressAsyncHandler(async(req,res,next)=>{
+  const existingUser =  await userModel.findById(req.myUser._id);
 
+  existingUser.password = req.body.password;
+  await existingUser.save();
+
+  new ApiResponse (200, "user password updated successfully").send(res);
+});
 
 
