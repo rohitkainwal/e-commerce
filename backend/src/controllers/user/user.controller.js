@@ -6,7 +6,6 @@ import { generateToken } from "../../utils/jwt.util.js";
 import expressAsyncHandler from "express-async-handler";
 import { log } from "../../utils/logger.js";
 
-
 // register
 export const registerUser = asyncHandler(async (req, res) => {
   const { username, email, password, contactNumber } = req.body;
@@ -28,7 +27,6 @@ export const registerUser = asyncHandler(async (req, res) => {
 });
 
 // login user
-
 export const loginUser = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -52,34 +50,43 @@ export const loginUser = asyncHandler(async (req, res, next) => {
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
-log("Cookie Sent to Client", req.cookies);
+  log("Cookie Sent to Client", req.cookies);
 
   //api response
   new ApiResponse(200, "user log in successfully").send(res);
 });
 
+//logout user
+export const logoutUser = asyncHandler(async(req,res,next)=>{
+  res.clearCookie("token");
+  new ApiResponse(201, "user logout successfully").send(res);
+});
+
 // currentUser
-    export const currentUser = expressAsyncHandler(async (req,res,next)=>{
-      
-    })
+export const currentUser = expressAsyncHandler(async (req, res, next) => {
+  new ApiResponse(201, "user logged in ").send(res);
+});
 
-    // update Profile
+// update Profile
+export const updateProfile = expressAsyncHandler(async (req, res, next) => {
+  log("Update Controller Hit");
+  const updateUser = await userModel.findByIdAndUpdate(
+    req.myUser._id,
+    req.body,
 
-    export const updateProfile = expressAsyncHandler(async (req,res,next)=>{
-      log("Update Controller Hit");
-       const updateUser = await userModel.findByIdAndUpdate(
-      req.myUser._id,
-      req.body,
-      
-      {
-        new:true,
-        runValidators:true
-      }
-    );
-    log("Request Body", req.body);
-    log("Logged In User", req.myUser);
-    
-    if(!updateUser) next(new CustomError(404, "user not found"));
-    new ApiResponse(200 , "user updated successfully", updateUser).send(res)
-    });
-   
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+  log("Request Body", req.body);
+  log("Logged In User", req.myUser);
+
+  if (!updateUser) next(new CustomError(404, "user not found"));
+  new ApiResponse(200, "user updated successfully", updateUser).send(res);
+});
+
+// update password
+
+
+
