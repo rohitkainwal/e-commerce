@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs"
+import crypto from "crypto"
+
+
 
 const userSchema = new mongoose.Schema({
 
@@ -31,8 +34,40 @@ const userSchema = new mongoose.Schema({
         required:true,
         default: false
     },
+    // for email
+     emailVerificationToken: {
+         type: String,
+    },
+       emailVerificationTokenExpiry: {
+         type: Date,
+    },
+
+    // for password
+     passwordResetToken: {
+         type: String,
+    },
+       passwordResetTokenExpiry: {
+         type: Date,
+    },
+
    
-},{timestamps:true,  toJSON: "", toObject: "" });
+},{timestamps:true, 
+    toJSON: function(doc,ret){
+        //TODO: change _id to id while displaying
+        delete doc.password;
+        return ret;
+},
+toObject: function(doc,ret){
+    console.log(Message, "to object called");
+    console.log(doc);
+    console.log(ret);
+    
+        //TODO: change _id to id while displaying
+        delete doc.password;
+        return ret;
+}
+
+});
 
 
 userSchema.pre("save", async function (next) {
@@ -46,6 +81,33 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcrypt.compare(enteredPassword,this.password)
 };
 
+
+
+userSchema.methods.generateEmailVerificationToken = function(){
+    const randomBytes = crypto.randomBytes(32);
+
+    this.emailVerificationToken =crypto
+    .createHash("sha256")
+    .update(randomBytes)
+    .digest("hex")
+    this.emailVerificationTokenExpiry = Date.now() + 10 * 60 * 1000;
+}
+
+userSchema.methods.generatePasswordResetToken = function(){
+    const randomBytes = crypto.randomBytes(32);
+
+    this.passwordResetToken =crypto
+    .createHash("sha256")
+    .update(randomBytes)
+    .digest("hex")
+    this.passwordResetToken = Date.now() + 10 * 60 * 1000;
+}
+
+
+
 const userModel = mongoose.model("user", userSchema) 
 
 export default userModel
+
+
+//? 1) while registring    

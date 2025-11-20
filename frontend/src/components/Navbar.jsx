@@ -1,25 +1,43 @@
 import React from "react";
-import { Link,useLocation, useNavigate } from "react-router-dom";
+import { Link , useLocation, useNavigate } from "react-router-dom";
+
 import { FaPowerOff } from "react-icons/fa";
+import axios from "axios"
 import toast from "react-hot-toast";
 
 
 const Navbar = () => {
 
-  let { pathname } = useLocation();
+  let pathname  = useLocation();
   let navigate = useNavigate()
 
 
-  let token = sessionStorage.getItem("accesstoken");
-  console.log(token)
+   let token = sessionStorage.getItem("accesstoken");
+   console.log(token)
+  
 
-  const handleLogout = () =>{
-    if(confirm("are you sure..?")){
-      sessionStorage.removeItem("accesstoken")
-      navigate("/login")
-      toast.success("user logout successfully")
+  const handleLogout = async () =>{
+    if(confirm("are you sure to logout")){
+      try {
+        const res = await axios.post(
+      "http://localhost:9000/api/user/logout",
+      {},
+      { withCredentials: true }      // If backend sets cookies
+    );
+    sessionStorage.removeItem("accesstoken");
+     toast.success("user logout successfully");
+        navigate("/login");
+      
+
+
+      } catch (error) {
+        console.log(error);
+        toast.error("logout Failed")
+      }
     }
-  }
+  };
+
+
 
   return (
     <header className="w-full h-20 px-6 shadow-lg bg-white flex items-center justify-between">

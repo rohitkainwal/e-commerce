@@ -76,7 +76,7 @@ const handleSubmit = async (e) => {
 
     // Reset form
     setFormData({
-      username: "",
+      username: "", 
       email: "",
       password: "",
       contactNumber: "",

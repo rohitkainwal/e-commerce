@@ -20,6 +20,9 @@ export const registerUser = asyncHandler(async (req, res) => {
     contactNumber,
   });
 
+  let emailVerificationToken = newUser.generateEmailVerificationToken();
+  console.log()
+
   // get response
 
   // res.status(200).json({success:true, message:"user registered succesfully ",newUser}); //
