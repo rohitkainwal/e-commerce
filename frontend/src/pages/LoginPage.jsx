@@ -2,6 +2,7 @@ import { useState } from "react";
 import Navbar from "../components/Navbar";
 import { Link , useNavigate} from "react-router-dom";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -16,38 +17,35 @@ const LoginPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let newUser = { ...formData };
 
-    if (newUser.email.trim() === "" && newUser.username.trim() === "" && newUser.password.trim() === "") {
+    if (newUser.email.trim() === ""  && newUser.password.trim() === "") {
       toast("Enter Credentials !", {icon: "☠️"});
       return;
     }
+    try {
+       const res = await axios.post(
+      "http://localhost:9000/api/user/login",
+      newUser,
+      { withCredentials: true }      // If backend sets cookies
+    );
+    // toast message
+      toast.success("Welcome...Login successful!")
+      // Your backend will set a cookie (token)
+    // You can store user info if backend returns it
 
-    let allSignUpUsers = JSON.parse(localStorage.getItem("users")) || []
-
-    let authUser = allSignUpUsers.find(ele => {
-      return ele.email === newUser.email && ele.password === newUser.password
-    })
-
-    console.log(authUser);
-
-    if (authUser) {
-      // toast message
-      toast.success("Welcome")
-
-      // navigate home 
+    // store Date.now() in session storage for conditional rendering
+      sessionStorage.setItem("accesstoken",Date.now())
+         // navigate home 
       navigate("/")
 
-      // store Date.now() in session storage for conditional rendering
-      sessionStorage.setItem("accesstoken",Date.now())
-    }else{
-      toast.error("User does not exists")
+        setFormData({ email: "", password: "" });
+    } catch (error) {
+      toast.error(error.response?.data?.message ||"User does not exists")
     }
-    
-
-    setFormData({ email: "", password: "" });
+  
   };
   return (
      <div>

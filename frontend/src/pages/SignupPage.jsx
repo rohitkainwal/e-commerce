@@ -3,12 +3,14 @@ import Navbar from "./../components/Navbar";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
+    contactNumber:"",
   });
 
   const handleChange = (e) => {
@@ -16,45 +18,75 @@ const SignupPage = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async(e) => {
-    e.preventDefault();
-    let newUser = { ...formData };
+//   const handleSubmit = async(e) => {
+//     e.preventDefault();
+//     let newUser = { ...formData };
 
- if (newUser.email.trim() === "" && newUser.username.trim() === "" && newUser.password.trim() === "") {
-      toast("Enter Credentials !", {icon: "☠️"});
-      return;
-    }
+//  if (newUser.email.trim() === "" && newUser.username.trim() === "" && newUser.password.trim() === "" && newUser.contactNumber.trim() === "") {
+//       toast("Enter Credentials !", {icon: "☠️"});
+//       return;
+//     }
 
 
-    // let allusers = JSON.parse(localStorage.getItem("users")) || [];
+//     let allusers = JSON.parse(localStorage.getItem("users")) || [];
 
-    // let existingUser = allusers.find((ele)=> ele.email === newUser.email);
+//     let existingUser = allusers.find((ele)=> ele.email === newUser.email);
 
-    // if(existingUser){
-    //   toast.error("user already exist");
-    //     return;
+//     if(existingUser){
+//       toast.error("user already exist");
+//         return;
       
-    // }
+//     }
 
-    // allusers.push(newUser);
-    // localStorage.setItem("users", JSON.stringify(allusers));
-    // setFormData({ username: "", email: "", password: "" });
+//     allusers.push(newUser);
+//     localStorage.setItem("users", JSON.stringify(allusers));
+//     setFormData({ username: "", email: "", password: "" , contactNumber: ""});
 
 
-     try {
-    // call your backend signup endpoint
-    const res = await axios.post("http://localhost:9000/api/auth/signup", formData);
+//   };
 
-    toast.success(res.data.msg);
 
-    // clear form
-    setFormData({ username: "", email: "", password: "" });
-  } catch (err) {
-    // if user already exists or other error
-    toast.error(err.response?.data?.msg || "Signup failed");
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  let newUser = { ...formData };
+
+  // Validation
+  if (
+    !newUser.username.trim() ||
+    !newUser.email.trim() ||
+    !newUser.password.trim() ||
+    !newUser.contactNumber.trim()
+  ) {
+    toast.error("All fields are required!");
+    return;
   }
-  };
 
+  try {
+    const res = await axios.post(
+      "http://localhost:9000/api/user/register",
+      newUser,
+      { withCredentials: true }      // If backend sets cookies
+    );
+
+    toast.success("Signup successful!");
+
+    console.log("Backend response:", res.data);
+
+    // Reset form
+    setFormData({
+      username: "",
+      email: "",
+      password: "",
+      contactNumber: "",
+    });
+
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Registration failed!");
+    console.log("Error:", error);
+  }
+};
   return (
     <div>
       {" "}
@@ -90,6 +122,15 @@ const SignupPage = () => {
             name="password"
             placeholder=" Enter password"
             value={formData.password}
+            onChange={handleChange}
+          />
+          <input
+            type="contactNumber"
+            className="border border-gray-500 rounded p-3 w-2xs mb-3"
+            id="contactNumber"
+            name="contactNumber"
+            placeholder=" Enter Contact Number"
+            value={formData.contactNumber}
             onChange={handleChange}
           />
           <p className="text-center font-semibold">
