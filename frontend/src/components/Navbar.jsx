@@ -43,8 +43,8 @@ const Navbar = () => {
     <header className="w-full h-20 px-6 shadow-lg bg-white flex items-center justify-between">
       
       {/* Logo */}
-      <div className="text-2xl font-bold text-blue-600">
-        <Link to="/">Crud App</Link>
+      <div className="text-2xl font-bold text-black-600">
+        <Link to="/">ElectroFit</Link>
       </div>
 
       {/* Navigation Links */}

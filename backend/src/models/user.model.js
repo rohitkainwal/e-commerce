@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs"
-import crypto from "crypto"
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 
 
@@ -29,85 +29,97 @@ const userSchema = new mongoose.Schema({
         unique: true
     },
 
-     isVarified: {
-         type:  Boolean,
-        required:true,
-        default: false
+        isVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
-    // for email
-     emailVerificationToken: {
-         type: String,
+    //! for email
+    emailVerificationToken: {
+      type: String,
     },
-       emailVerificationTokenExpiry: {
-         type: Date,
+    emailVerificationTokenExpiry: {
+      type: Date,
     },
 
-    // for password
-     passwordResetToken: {
-         type: String,
+    //! for password
+    passwordResetToken: {
+      type: String,
     },
-       passwordResetTokenExpiry: {
-         type: Date,
+    passwordResetTokenExpiry: {
+      type: Date,
     },
 
    
-},{timestamps:true, 
-    toJSON: function(doc,ret){
-        //TODO: change _id to id while displaying
-        delete doc.password;
-        return ret;
-},
-toObject: function(doc,ret){
-    console.log(Message, "to object called");
-    console.log(doc);
-    console.log(ret);
-    
-        //TODO: change _id to id while displaying
-        delete doc.password;
-        return ret;
-}
-
-});
+}, {
+    timestamps: true,
+    toJSON: {
+      transform(doc, ret) {
+        delete ret.password;
+        delete ret.__v;
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+    toObject: {
+      transform(doc, ret) {
+        delete ret.password;
+        delete ret.__v;
+        ret.id = ret._id;
+        delete ret._id;
+      },
+    },
+  }
+);
 
 
 userSchema.pre("save", async function (next) {
-    let salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password,salt);
-    next();
-    console.log("password hashed executed")
+  if (!this.isModified("password")) {
+    return next();
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+
+  console.log("password hashed executed");
+  next();
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
-    return await bcrypt.compare(enteredPassword,this.password)
+  return await bcrypt.compare(enteredPassword, this.password);
 };
 
+userSchema.methods.generateEmailVerificationToken = function () {
+  const randomBytes = crypto.randomBytes(32).toString("hex");
 
+  this.emailVerificationToken = crypto
+    .createHash("sha256") //? algorithm
+    .update(randomBytes) //? data to be hashed
+    .digest("hex"); //? op to be displayed
 
-userSchema.methods.generateEmailVerificationToken = function(){
-    const randomBytes = crypto.randomBytes(32);
+  this.emailVerificationTokenExpiry = Date.now() + 10 * 60 * 1000;
+  return randomBytes;
+};
 
-    this.emailVerificationToken =crypto
+userSchema.methods.generateResetPasswordToken = function () {
+  const randomBytes = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
     .createHash("sha256")
     .update(randomBytes)
-    .digest("hex")
-    this.emailVerificationTokenExpiry = Date.now() + 10 * 60 * 1000;
-}
+    .digest("hex");
 
-userSchema.methods.generatePasswordResetToken = function(){
-    const randomBytes = crypto.randomBytes(32);
+  this.passwordResetTokenExpiry = Date.now() + 10 * 60 * 1000;
 
-    this.passwordResetToken =crypto
-    .createHash("sha256")
-    .update(randomBytes)
-    .digest("hex")
-    this.passwordResetToken = Date.now() + 10 * 60 * 1000;
-}
-
+  return randomBytes;
+};
 
 
 const userModel = mongoose.model("user", userSchema) 
 
 export default userModel
 
-
-//? 1) while registring    
+//? 1) while registering, a token is generated and that token is sent to the client's mail
+//? 2) in backend, same token is hashed using some process, and that hashed token is saved in database
+//? 3) when client will click on the verification link, in the url there will be un-hashed token will be present, we will extract the token, and the extracted token is hashed using same process
+//? 4) after that the hashed token is checked in database, if it matches, then we will update the isVerified field to true
