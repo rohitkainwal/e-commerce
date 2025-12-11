@@ -84,6 +84,8 @@ export const loginUser = expressAsyncHandler(async (req, res, next) => {
   res.cookie("token", token, {
     maxAge: process.env.JWT_TOKEN_EXPIRY * 60 * 60 * 1000,
     httpOnly: true,
+    secure: true,
+    sameSite: "none",
   });
 
   new ApiResponse(200, "User Logged In Successfully").send(res);
@@ -144,6 +146,7 @@ export const changePassword = expressAsyncHandler(async (req, res, next) => {
   const existingUser = await UserModel.findById(req.myUser._id);
 
   existingUser.password = req.body.password;
+  console.log(existingUser);
   await existingUser.save();
 
   new ApiResponse(200, "Password Updated Successfully").send(res);
