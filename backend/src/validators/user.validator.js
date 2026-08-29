@@ -27,6 +27,7 @@ export const updateProfileSchema = Joi.object({
 });
 
 export const updatePasswordSchema = Joi.object({
+  oldPassword: Joi.string().min(5).max(50).required(),
   password: Joi.string().min(5).max(50).required(),
 });
 

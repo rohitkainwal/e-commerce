@@ -29,8 +29,9 @@ const OrderSchema = new Schema(
           trim: true,
         },
         image: {
+          //? not required, some old products do not have any image uploaded
           type: String,
-          required: true,
+          default: "",
         },
         price: {
           type: Number,
@@ -53,6 +54,7 @@ const OrderSchema = new Schema(
       },
       addressLine: { type: String, required: true },
       city: { type: String, required: true },
+      state: { type: String, required: true },
       pincode: { type: String, required: true },
       phone: { type: String, required: true },
       notes: { type: String, default: "" },

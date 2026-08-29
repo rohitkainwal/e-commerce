@@ -86,7 +86,6 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword) {
-  console.log("this.password", this.password);
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
@@ -114,6 +113,7 @@ userSchema.methods.generateResetPasswordToken = function () {
 
   return randomBytes;
 };
+
 
 const UserModel = mongoose.model("User", userSchema);
 

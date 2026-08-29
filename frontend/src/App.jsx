@@ -1,16 +1,8 @@
-import React from 'react'
-import { RouterProvider } from 'react-router-dom'
-import { myRoutes } from './routes/Routing'
-import { Toaster } from 'react-hot-toast'
-
+import { RouterProvider } from "react-router-dom";
+import { myRoutes } from "./routes/Routing.jsx";
 
 const App = () => {
-  return (
-    <div>
-      <RouterProvider router={myRoutes}/>
-      <Toaster/>
-    </div>
-  )
-}
+  return <RouterProvider router={myRoutes} />;
+};
 
-export default App
+export default App;

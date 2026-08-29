@@ -3,14 +3,19 @@
 frontend/dist/
 frontend/build/
 frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/.vercel
 
 # Backend
 /backend/node_modules/
 backend/dist/
 backend/.env
+backend/.env.local
 
 # Logs
 *.log
+npm-debug.log*
 
 # OS Junk
 .DS_Store

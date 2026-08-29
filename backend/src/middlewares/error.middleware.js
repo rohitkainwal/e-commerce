@@ -23,9 +23,20 @@ export const errorMiddleware = (err, req, res, next) => {
     message = "Invalid Session, Please login again";
   }
 
-  res
-    .status(statusCode)
-    .json({ success: false, message, errObj: err, errLine: err.stack });
+  if (err.name === "TokenExpiredError") {
+    statusCode = 401;
+    message = "Session Expired, Please login again";
+  }
+
+  let responseObject = { success: false, message };
+
+  //? sending the full error + stack only while developing, not in production
+  if (process.env.NODE_ENV !== "production") {
+    responseObject.errObj = err;
+    responseObject.errLine = err.stack;
+  }
+
+  res.status(statusCode).json(responseObject);
 };
 
 //! use this error middleware in the last

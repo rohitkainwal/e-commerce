@@ -10,7 +10,9 @@ export const authenticate = expressAsyncHandler(async (req, res, next) => {
 
   const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
   const user = await UserModel.findById(decodedToken.id);
-  if (!user) next(new CustomError(401, "Invalid Session, Please login again")); //? {_id, username, }
+  //! return is needed here also
+  if (!user)
+    return next(new CustomError(401, "Invalid Session, Please login again")); //? {_id, username, }
 
   req.myUser = user;
   next();

@@ -31,6 +31,15 @@ const addressSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    //? filled only when the user picks his current location on the map/gps
+    lat: {
+      type: Number,
+      default: null,
+    },
+    lng: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

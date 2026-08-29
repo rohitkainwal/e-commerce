@@ -8,7 +8,8 @@ export const validate = (schema) => {
     });
 
     if (error) {
-      next(
+      //! return is important here, otherwise next() was getting called twice
+      return next(
         new CustomError(
           400, //? status code
           `${error.details.map((ele) => ele.message)}` //? error message

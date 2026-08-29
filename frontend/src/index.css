@@ -1,1 +1,97 @@
-@import "tailwindcss"
+@import "tailwindcss";
+
+/*
+  colours taken from the NatureCart design file.
+  background is white here (not cream), green is #1B8A3B.
+*/
+@theme {
+  /* brand green */
+  --color-primary-25: #f1f8ec; /* category circle background */
+  --color-primary-50: #edf7eb; /* soft green chip */
+  --color-primary-100: #dff3e1; /* text on the dark green bar */
+  --color-primary-200: #b9dcb0; /* outline buttons */
+  --color-primary-300: #7cc24b; /* leaf accent in the logo */
+  --color-primary-400: #3e8f35;
+  --color-primary-500: #12652a; /* darker green, used on hover */
+  --color-primary-600: #1b8a3b; /* MAIN brand green */
+  --color-primary-700: #12652a;
+  --color-primary-800: #15311c;
+  --color-primary-900: #12331b;
+
+  /* neutrals */
+  --color-ink-50: #f6f9f5;
+  --color-ink-100: #eff3ee;
+  --color-ink-200: #e1e8e0;
+  --color-ink-300: #c9d2c8;
+  --color-ink-400: #98a198;
+  --color-ink-500: #8a948a; /* muted label */
+  --color-ink-600: #5e685e; /* secondary text */
+  --color-ink-700: #3a423a;
+  --color-ink-800: #252925;
+  --color-ink-900: #1a1d1a; /* headings + body */
+
+  /* light surfaces */
+  --color-cream-50: #f4f7f4; /* search box / image wells */
+  --color-cream-100: #f6f9f5;
+  --color-cream-200: #f1f8ec;
+  --color-cream-300: #e9f5e7;
+  --color-cream-400: #dce5d9;
+  --color-cream-500: #cfe6c6;
+  --color-cream-600: #b9dcb0;
+  --color-cream-700: #7a8478;
+
+  /* one border colour everywhere */
+  --color-line: #ebf0ea;
+  --color-line-strong: #e1e8e0;
+
+  /* accents */
+  --color-accent: #b45309;
+  --color-accent-soft: #fbf4e2;
+  --color-accent-ink: #8a5a0b;
+  --color-brandred: #c0322c;
+  --color-navy: #12652a; /* discount badge, kept green here */
+  --color-cartbg: #ffffff;
+  --color-carttext: #1b8a3b;
+
+  --shadow-card: 0 2px 8px rgba(27, 138, 59, 0.06);
+  --shadow-card-hover: 0 8px 22px rgba(24, 60, 28, 0.09);
+  --shadow-pop: 0 8px 22px rgba(20, 60, 25, 0.14);
+
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.4px;
+  color: var(--color-ink-900);
+}
+
+/* one focus style for the whole app, only when using the keyboard */
+:focus-visible {
+  outline: 2px solid var(--color-primary-600);
+  outline-offset: 2px;
+}
+
+/* hides the ugly arrows on number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  height: 0;
+  width: 0;
+}

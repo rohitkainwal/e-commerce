@@ -2,31 +2,42 @@ import expressAsyncHandler from "express-async-handler";
 import ProductModel from "../../models/product.model.js";
 import ApiResponse from "../../utils/ApiResponse.util.js";
 import CustomError from "../../utils/CustomError.util.js";
+import { escapeRegex } from "../../utils/escapeRegex.util.js";
 
 export const fetchProducts = expressAsyncHandler(async (req, res, next) => {
-  const {
-    category = [],
-    brand = [],
+  //! these were const before and i was reassigning them, that was throwing error
+  let {
+    category = "",
+    brand = "",
     sortBy,
-    minPrice = 1,
+    minPrice = 0,
     maxPrice = Number.MAX_SAFE_INTEGER,
   } = req.query;
 
-  category = category.toLocaleLowerCase();
-  brand = brand.toLocaleLowerCase();
+  //? query params always come as string, so converting them
+  minPrice = Number(minPrice) || 0;
+  maxPrice = Number(maxPrice) || Number.MAX_SAFE_INTEGER;
 
   let filterObject = {};
   let sortObject = {};
 
+  //? some products are saved as "Mobiles" and some as "mobiles",
+  //? so matching without caring about the case
+  const caseInsensitiveList = (value) =>
+    value
+      .split(",")
+      .filter((ele) => ele.trim().length > 0)
+      .map((ele) => new RegExp(`^${escapeRegex(ele.trim())}$`, "i"));
+
   if (category.length > 0) {
-    filterObject.category = { $in: category.split(",") };
+    filterObject.category = { $in: caseInsensitiveList(category) };
   }
   if (brand.length > 0) {
-    filterObject.brand = { $in: brand.split(",") };
+    filterObject.brand = { $in: caseInsensitiveList(brand) };
   }
-  if (minPrice && maxPrice) {
-    filterObject.price = { $and: [{ $gte: minPrice }, { $lte: maxPrice }] };
-  }
+
+  //! $and does not work like this inside a field, it has to be $gte and $lte directly
+  filterObject.price = { $gte: minPrice, $lte: maxPrice };
 
   if (sortBy == "lowToHigh") {
     sortObject.price = 1;
@@ -45,17 +56,39 @@ export const fetchProducts = expressAsyncHandler(async (req, res, next) => {
 
   let products = await ProductModel.find(filterObject).sort(sortObject);
 
-  if (products.length === 0)
-    return next(new CustomError(404, "No products found"));
-
-  new ApiResponse(200, "Products Fetched Successfully", products).send(res);
+  //? not sending 404 here, empty list is a normal thing when filters match nothing.
+  //? frontend will just show "no products found"
+  new ApiResponse(200, "Products Fetched Successfully", products, {
+    total: products.length,
+  }).send(res);
 });
 
-export const fetchProduct = expressAsyncHandler(async (req, res, next) => {});
+export const fetchProduct = expressAsyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const product = await ProductModel.findById(id);
+  if (!product) return next(new CustomError(404, "Product Not Found"));
+
+  new ApiResponse(200, "Product Fetched Successfully", product).send(res);
+});
+
+//~ frontend needs the list of categories and brands to show the filter checkboxes
+export const getFilters = expressAsyncHandler(async (req, res, next) => {
+  const categories = await ProductModel.distinct("category");
+  const brands = await ProductModel.distinct("brand");
+
+  new ApiResponse(200, "Filters Fetched Successfully", {
+    categories,
+    brands,
+  }).send(res);
+});
 
 export const searchProducts = expressAsyncHandler(async (req, res, next) => {
   const keyword = req.query.keyword;
-  let pattern = new RegExp(keyword, "i");
+
+  if (!keyword) return next(new CustomError(400, "Please enter something to search"));
+
+  let pattern = new RegExp(escapeRegex(keyword), "i");
 
   let products = await ProductModel.find({
     $or: [
@@ -66,15 +99,12 @@ export const searchProducts = expressAsyncHandler(async (req, res, next) => {
     ],
   });
 
-  if (products.length === 0)
-    return next(new CustomError(404, "No products found"));
-
-  new ApiResponse(200, "Products Fetched Successfully", products).send(res);
+  new ApiResponse(200, "Products Fetched Successfully", products, {
+    total: products.length,
+  }).send(res);
 });
-
-// https://www.amazon.in/s?k=headphones&rh=p_n_feature_two_browse-bin%3A207962822031%257C27344393031%2Cp_123%3A233043&dc&crid=2AY029FVSR2M0&qid=1764742397&rnid=91049095031&sprefix=headphone%2Caps%2C215&ref=sr_nr_p_123_3&ds=v1%3ASHryNqvHFFDenDGu7Qm0lBTDWheWY4476XgruG8sjcQ
 
 // let filterObject = {
 //   category: { $in: ["electronics"] },
-//   price: { $and: [[Object], [Object]] },
+//   price: { $gte: 100, $lte: 5000 },
 // };
